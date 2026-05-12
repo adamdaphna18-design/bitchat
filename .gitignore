@@ -80,3 +80,14 @@ build.log
 
 # Local configs
 Local.xcconfig
+
+# Node.js
+node_modules/
+dist/
+.env
+
+# pnpm
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.pnpm-debug.log
