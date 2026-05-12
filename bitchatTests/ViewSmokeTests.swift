@@ -9,6 +9,7 @@ import UIKit
 import AppKit
 #endif
 import BitFoundation
+import BitFoundationTestHelpers
 @testable import bitchat
 
 @MainActor

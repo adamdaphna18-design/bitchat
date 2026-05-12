@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BitFoundationTestHelpers
 import CryptoKit
 import Testing
 @testable import BitFoundation // to avoid unnecessary public's

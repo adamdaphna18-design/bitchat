@@ -9,6 +9,7 @@
 import Testing
 import Foundation
 @testable import BitFoundation
+import BitFoundationTestHelpers
 
 struct BinaryProtocolTests {
     

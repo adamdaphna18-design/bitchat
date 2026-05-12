@@ -12,6 +12,10 @@ let package = Package(
         .library(
             name: "BitFoundation",
             targets: ["BitFoundation"]
+        ),
+        .library(
+            name: "BitFoundationTestHelpers",
+            targets: ["BitFoundationTestHelpers"]
         )
     ],
     dependencies: [
@@ -23,11 +27,16 @@ let package = Package(
             dependencies: [
                 .product(name: "BitLogger", package: "BitLogger"),
             ],
-            path: "Sources"
+            path: "Sources/BitFoundation"
+        ),
+        .target(
+            name: "BitFoundationTestHelpers",
+            dependencies: ["BitFoundation"],
+            path: "Sources/BitFoundationTestHelpers"
         ),
         .testTarget(
             name: "BitFoundationTests",
-            dependencies: ["BitFoundation"],
+            dependencies: ["BitFoundation", "BitFoundationTestHelpers"],
         )
     ]
 )

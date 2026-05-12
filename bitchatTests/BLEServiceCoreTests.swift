@@ -7,6 +7,7 @@
 
 import Testing
 import Foundation
+import BitFoundationTestHelpers
 import CoreBluetooth
 import BitFoundation
 @testable import bitchat

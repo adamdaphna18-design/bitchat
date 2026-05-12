@@ -1,4 +1,5 @@
 import XCTest
+import BitFoundationTestHelpers
 @testable import bitchat
 
 final class VerificationServiceTests: XCTestCase {
