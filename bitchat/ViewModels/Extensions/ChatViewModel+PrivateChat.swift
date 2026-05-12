@@ -81,7 +81,7 @@ extension ChatViewModel {
             privateChats[peerID] = []
         }
         privateChats[peerID]?.append(message)
-        privateChatManager.recordMessageID(messageID)
+        privateChatManager.recordMessageID(messageID, message: message)
         
         // Trigger UI update for sent message
         objectWillChange.send()
@@ -138,7 +138,7 @@ extension ChatViewModel {
         }
         
         privateChats[peerID]?.append(message)
-        privateChatManager.recordMessageID(messageID)
+        privateChatManager.recordMessageID(messageID, message: message)
         objectWillChange.send()
 
         // Resolve recipient hex from mapping
@@ -233,7 +233,7 @@ extension ChatViewModel {
             privateChats[convKey] = []
         }
         privateChats[convKey]?.append(msg)
-        privateChatManager.recordMessageID(messageId)
+        privateChatManager.recordMessageID(messageId, message: msg)
         
         let isViewing = selectedPrivateChatPeer == convKey
         let wasReadBefore = sentReadReceipts.contains(messageId)
@@ -469,7 +469,7 @@ extension ChatViewModel {
             var chats = privateChats
             chats[peerID, default: []].append(message)
             privateChats = chats
-            privateChatManager.recordMessageID(message.id)
+            privateChatManager.recordMessageID(message.id, message: message)
             trimMessagesIfNeeded()
         } else {
             let (displayName, senderPeerID) = currentPublicSender()
@@ -732,7 +732,7 @@ extension ChatViewModel {
                     // Add any messages that aren't already in the ephemeral storage
                     let existingMessageIds = Set(privateChats[peerID]?.map { $0.id } ?? [])
                     for nostrMessage in nostrMessages {
-                        privateChatManager.recordMessageID(nostrMessage.id)
+                        privateChatManager.recordMessageID(nostrMessage.id, message: nostrMessage)
                         if !existingMessageIds.contains(nostrMessage.id) {
                             privateChats[peerID]?.append(nostrMessage)
                         }
@@ -794,7 +794,7 @@ extension ChatViewModel {
     }
     
     func addMessageToPrivateChatsIfNeeded(_ message: BitchatMessage, targetPeerID: PeerID) {
-        privateChatManager.recordMessageID(message.id)
+        privateChatManager.recordMessageID(message.id, message: message)
         if privateChats[targetPeerID] == nil {
             privateChats[targetPeerID] = []
         }
@@ -816,7 +816,7 @@ extension ChatViewModel {
             return
         }
         
-        privateChatManager.recordMessageID(message.id)
+        privateChatManager.recordMessageID(message.id, message: message)
         if privateChats[ephemeralPeerID] == nil {
             privateChats[ephemeralPeerID] = []
         }
@@ -1025,7 +1025,7 @@ extension ChatViewModel {
             // Add migrated messages to new peer ID
             if !migratedMessages.isEmpty {
                 for msg in migratedMessages {
-                    privateChatManager.recordMessageID(msg.id)
+                    privateChatManager.recordMessageID(msg.id, message: msg)
                 }
                 if privateChats[peerID] == nil {
                     privateChats[peerID] = []

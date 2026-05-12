@@ -3597,30 +3597,27 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
             }
         }
         
-        // Update in main messages
+        // Optimized update via PrivateChatManager registry (O(1))
+        if let msg = privateChatManager.message(withID: messageID) {
+            if !shouldSkipUpdate(currentStatus: msg.deliveryStatus, newStatus: status) {
+                msg.deliveryStatus = status
+                DispatchQueue.main.async { [weak self] in
+                    self?.objectWillChange.send()
+                }
+            }
+            return
+        }
+
+        // Fallback for public messages or unregistered private messages (still O(N))
         if let index = messages.firstIndex(where: { $0.id == messageID }) {
             let currentStatus = messages[index].deliveryStatus
             if !shouldSkipUpdate(currentStatus: currentStatus, newStatus: status) {
                 messages[index].deliveryStatus = status
+                DispatchQueue.main.async { [weak self] in
+                    self?.objectWillChange.send()
+                }
             }
         }
-        
-        // Update in private chats
-        for (peerID, chatMessages) in privateChats {
-            guard let index = chatMessages.firstIndex(where: { $0.id == messageID }) else { continue }
-            
-            let currentStatus = chatMessages[index].deliveryStatus
-            guard !shouldSkipUpdate(currentStatus: currentStatus, newStatus: status) else { continue }
-            
-            // Update delivery status directly (BitchatMessage is a class/reference type)
-            privateChats[peerID]?[index].deliveryStatus = status
-        }
-        
-        // Trigger UI update for delivery status change
-        DispatchQueue.main.async { [weak self] in
-            self?.objectWillChange.send()
-        }
-        
     }
     
     // MARK: - Helper for System Messages
