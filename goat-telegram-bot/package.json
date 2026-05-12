@@ -1,0 +1,29 @@
+{
+  "name": "goat-telegram-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx src/bot.ts",
+    "build": "tsc",
+    "start": "node dist/bot.js",
+    "test": "echo \"Error: no test specified\" && true"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.30.3",
+  "dependencies": {
+    "@goat-sdk/core": "0.5.0",
+    "@goat-sdk/plugin-erc20": "0.2.14",
+    "@goat-sdk/wallet-viem": "0.3.0",
+    "@types/node": "25.7.0",
+    "dotenv": "17.4.2",
+    "telegraf": "4.16.3",
+    "typescript": "6.0.3",
+    "viem": "2.48.11"
+  },
+  "devDependencies": {
+    "tsx": "4.21.0"
+  }
+}
