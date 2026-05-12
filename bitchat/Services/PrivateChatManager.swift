@@ -19,11 +19,7 @@ final class PrivateChatManager: ObservableObject {
 
     private var selectedPeerFingerprint: String? = nil
     var sentReadReceipts: Set<String> = []  // Made accessible for ChatViewModel
-    private var seenMessageIDs: Set<String> = [] {
-        didSet {
-            persistSeenMessageIDs()
-        }
-    }
+    private var seenMessageIDs: Set<String> = []
     private var messageRegistry: [String: BitchatMessage] = [:]
 
     weak var meshService: Transport?
@@ -243,6 +239,10 @@ final class PrivateChatManager: ObservableObject {
 
         // 2. Enforce Cap
         if deduped.count > privateChatCap {
+            let dropped = Array(deduped.prefix(deduped.count - privateChatCap))
+            for msg in dropped {
+                messageRegistry.removeValue(forKey: msg.id)
+            }
             deduped = Array(deduped.suffix(privateChatCap))
         }
 
@@ -283,11 +283,19 @@ final class PrivateChatManager: ObservableObject {
             messageRegistry[messageID] = message
         }
 
-        // Bounding the registry size to prevent memory leaks (arbitrary cap, e.g. 5000)
+        // Bounding the registry and seen set to prevent memory leaks
+        // seenMessageIDs is kept larger to prevent duplicate notifications for older messages
         if messageRegistry.count > 5000 {
             let keysToRemove = Array(messageRegistry.keys.prefix(1000))
             for key in keysToRemove {
                 messageRegistry.removeValue(forKey: key)
+            }
+        }
+
+        if seenMessageIDs.count > 10000 {
+            let idsToRemove = Array(seenMessageIDs.prefix(2000))
+            for id in idsToRemove {
+                seenMessageIDs.remove(id)
             }
         }
     }
@@ -314,8 +322,16 @@ final class PrivateChatManager: ObservableObject {
 
     // MARK: - Persistence
 
-    private func persistSeenMessageIDs() {
-        if let data = try? JSONEncoder().encode(Array(seenMessageIDs)) {
+    /// Persists seen message IDs to disk.
+    /// Should be called during app backgrounding or termination to avoid excessive IO.
+    func saveState() {
+        // Limit the number of IDs persisted to prevent performance degradation with UserDefaults
+        let limit = 5000
+        let idsToPersist = seenMessageIDs.count > limit
+            ? Array(seenMessageIDs.prefix(limit))
+            : Array(seenMessageIDs)
+
+        if let data = try? JSONEncoder().encode(idsToPersist) {
             UserDefaults.standard.set(data, forKey: "bitchat.seenMessageIDs")
         }
     }

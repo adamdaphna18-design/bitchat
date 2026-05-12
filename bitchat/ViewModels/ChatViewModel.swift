@@ -1699,6 +1699,9 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
         // Force save any pending identity changes (verifications, favorites, etc)
         identityManager.forceSave()
 
+        // Save private chat manager state
+        privateChatManager.saveState()
+
         // Verify identity key is still there
         _ = keychain.verifyIdentityKeyExists()
     }
