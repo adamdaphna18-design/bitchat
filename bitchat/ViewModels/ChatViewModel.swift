@@ -366,9 +366,9 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
             // Only persist if there are changes
             guard oldValue != sentReadReceipts else { return }
             
-            // Persist to UserDefaults whenever it changes (no manual synchronize/verify re-read)
+            // Persist to Keychain whenever it changes
             if let data = try? JSONEncoder().encode(Array(sentReadReceipts)) {
-                UserDefaults.standard.set(data, forKey: "sentReadReceipts")
+                keychain.save(key: "sentReadReceipts", data: data, service: BitchatApp.bundleID, accessible: kSecAttrAccessibleWhenUnlocked)
             } else {
                 SecureLogger.error("❌ Failed to encode read receipts for persistence", category: .session)
             }
@@ -420,13 +420,19 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
         self.meshService = transport
         self.publicMessagePipeline = PublicMessagePipeline()
         
-        // Load persisted read receipts
-        if let data = UserDefaults.standard.data(forKey: "sentReadReceipts"),
-           let receipts = try? JSONDecoder().decode([String].self, from: data) {
-            self.sentReadReceipts = Set(receipts)
-            // Successfully loaded read receipts
-        } else {
-            // No persisted read receipts found
+        // Load persisted read receipts from Keychain (with migration from UserDefaults)
+        if let data = keychain.load(key: "sentReadReceipts", service: BitchatApp.bundleID) {
+            if let receipts = try? JSONDecoder().decode([String].self, from: data) {
+                self.sentReadReceipts = Set(receipts)
+            }
+        } else if let data = UserDefaults.standard.data(forKey: "sentReadReceipts") {
+            // Migrate from insecure UserDefaults to Keychain
+            keychain.save(key: "sentReadReceipts", data: data, service: BitchatApp.bundleID, accessible: kSecAttrAccessibleWhenUnlocked)
+            if let receipts = try? JSONDecoder().decode([String].self, from: data) {
+                self.sentReadReceipts = Set(receipts)
+            }
+            UserDefaults.standard.removeObject(forKey: "sentReadReceipts")
+            SecureLogger.info("Migrated read receipts from UserDefaults to Keychain", category: .session)
         }
         
         // Initialize services
