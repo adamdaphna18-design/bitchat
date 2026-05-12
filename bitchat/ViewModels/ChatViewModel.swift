@@ -933,6 +933,9 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
                     if chats[currentPeerID] == nil {
                         chats[currentPeerID] = []
                     }
+                    for msg in oldMessages {
+                        privateChatManager.recordMessageID(msg.id)
+                    }
                     chats[currentPeerID]?.append(contentsOf: oldMessages)
                     // Sort by timestamp
                     chats[currentPeerID]?.sort { $0.timestamp < $1.timestamp }
@@ -1307,6 +1310,9 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
             removedMessage = removedMessage ?? storeRemoved
         }
 
+        // Remove from seen message IDs
+        privateChatManager.removeMessageID(messageID)
+
         var chats = privateChats
         for (peerID, items) in chats {
             let filtered = items.filter { $0.id != messageID }
@@ -1346,6 +1352,7 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
         )
         if privateChats[peerID] == nil { privateChats[peerID] = [] }
         privateChats[peerID]?.append(systemMessage)
+        privateChatManager.recordMessageID(systemMessage.id)
         objectWillChange.send()
     }
     
@@ -1939,6 +1946,7 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
         // Clear read receipt tracking
         sentReadReceipts.removeAll()
         deduplicationService.clearAll()
+        privateChatManager.clearAllMessageIDs()
 
         // Clear all caches
         invalidateEncryptionCache()
@@ -3295,6 +3303,7 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
                         deliveryStatus: msg.deliveryStatus
                     )
                     privateChats[stableKeyHex]?.append(updated)
+                    privateChatManager.recordMessageID(updated.id)
                 }
                 privateChats[stableKeyHex]?.sort { $0.timestamp < $1.timestamp }
                 privateChats.removeValue(forKey: peerID)

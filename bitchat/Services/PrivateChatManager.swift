@@ -19,6 +19,7 @@ final class PrivateChatManager: ObservableObject {
 
     private var selectedPeerFingerprint: String? = nil
     var sentReadReceipts: Set<String> = []  // Made accessible for ChatViewModel
+    private var seenMessageIDs: Set<String> = []
 
     weak var meshService: Transport?
     // Route acks/receipts via MessageRouter (chooses mesh or Nostr)
@@ -58,6 +59,7 @@ final class PrivateChatManager: ObservableObject {
 
                 let existingMessageIds = Set(privateChats[peerID]?.map { $0.id } ?? [])
                 for message in nostrMessages {
+                    recordMessageID(message.id)
                     if !existingMessageIds.contains(message.id) {
                         // Update senderPeerID for correct read receipts
                         let updatedMessage = BitchatMessage(
@@ -127,6 +129,7 @@ final class PrivateChatManager: ObservableObject {
 
                 if let tempMessages = privateChats[tempPeerID] {
                     for message in tempMessages {
+                        recordMessageID(message.id)
                         if !existingMessageIds.contains(message.id) {
                             let updatedMessage = BitchatMessage(
                                 id: message.id,
@@ -240,11 +243,38 @@ final class PrivateChatManager: ObservableObject {
         // Send read receipts for unread messages that haven't been sent yet
         if let messages = privateChats[peerID] {
             for message in messages {
+                recordMessageID(message.id)
                 if message.senderPeerID == peerID && !message.isRelay && !sentReadReceipts.contains(message.id) {
                     sendReadReceipt(for: message)
                 }
             }
         }
+    }
+
+    // MARK: - Deduplication
+
+    /// Check if message is duplicate.
+    /// - Parameter messageID: The message identifier to check.
+    /// - Returns: `true` if the message was already seen, `false` otherwise.
+    func isDuplicate(_ messageID: String) -> Bool {
+        return seenMessageIDs.contains(messageID)
+    }
+
+    /// Record a message ID in the global seen set.
+    /// - Parameter messageID: The message identifier to record.
+    func recordMessageID(_ messageID: String) {
+        seenMessageIDs.insert(messageID)
+    }
+
+    /// Remove a specific message ID from the seen set.
+    /// - Parameter messageID: The message identifier to remove.
+    func removeMessageID(_ messageID: String) {
+        seenMessageIDs.remove(messageID)
+    }
+
+    /// Clear all seen message IDs.
+    func clearAllMessageIDs() {
+        seenMessageIDs.removeAll()
     }
     
     // MARK: - Private Methods
