@@ -9,6 +9,7 @@
 import Testing
 import Foundation
 @testable import BitFoundation
+import BitFoundationTestHelpers
 
 struct PeerIDTests {
     private let hex16 = "0011223344556677"

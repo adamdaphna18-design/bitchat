@@ -10,6 +10,7 @@ import Testing
 import Foundation
 import CoreBluetooth
 import BitFoundation
+import BitFoundationTestHelpers
 @testable import bitchat
 
 struct FragmentationTests {

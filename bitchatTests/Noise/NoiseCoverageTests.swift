@@ -2,6 +2,7 @@ import CryptoKit
 import Foundation
 import Testing
 import BitFoundation
+import BitFoundationTestHelpers
 
 @testable import bitchat
 

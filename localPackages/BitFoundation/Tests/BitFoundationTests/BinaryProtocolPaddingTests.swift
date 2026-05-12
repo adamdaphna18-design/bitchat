@@ -7,6 +7,7 @@
 
 import Testing
 @testable import BitFoundation
+import BitFoundationTestHelpers
 
 struct BinaryProtocolPaddingTests {
     @Test func padded_vs_unpadded_length() throws {

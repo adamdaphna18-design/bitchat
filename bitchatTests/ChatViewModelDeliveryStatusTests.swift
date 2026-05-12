@@ -8,6 +8,7 @@
 import Testing
 import Foundation
 import BitFoundation
+import BitFoundationTestHelpers
 @testable import bitchat
 
 // MARK: - Test Helpers

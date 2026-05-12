@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import BitFoundationTestHelpers
 @testable import bitchat
 
 struct LocationChannelsTests {

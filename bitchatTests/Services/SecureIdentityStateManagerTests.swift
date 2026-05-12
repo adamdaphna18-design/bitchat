@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
 import BitFoundation
+import BitFoundationTestHelpers
 @testable import bitchat
 
 final class SecureIdentityStateManagerTests: XCTestCase {

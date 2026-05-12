@@ -7,6 +7,7 @@
 //
 
 import Testing
+import BitFoundationTestHelpers
 import struct Foundation.UUID
 @testable import BitFoundation // to avoid unnecessary public's
 @testable import bitchat

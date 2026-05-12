@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import BitFoundationTestHelpers
 import Combine
 import CoreBluetooth
 import BitFoundation

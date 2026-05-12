@@ -1,4 +1,5 @@
 import Foundation
+import BitFoundationTestHelpers
 import Combine
 import Testing
 @testable import bitchat

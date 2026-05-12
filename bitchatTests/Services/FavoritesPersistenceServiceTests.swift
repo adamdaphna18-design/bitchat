@@ -1,5 +1,6 @@
 import XCTest
 import BitFoundation
+import BitFoundationTestHelpers
 @testable import bitchat
 
 @MainActor

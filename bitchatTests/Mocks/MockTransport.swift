@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import CoreBluetooth
 import BitFoundation
+import BitFoundationTestHelpers
 @testable import bitchat
 
 /// Mock Transport implementation for testing ChatViewModel in isolation.

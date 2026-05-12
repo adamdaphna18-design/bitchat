@@ -7,6 +7,7 @@
 
 import Testing
 import Foundation
+import BitFoundationTestHelpers
 import Combine
 #if os(iOS)
 import UIKit
