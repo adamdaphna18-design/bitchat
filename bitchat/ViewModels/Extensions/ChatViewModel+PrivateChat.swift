@@ -961,49 +961,73 @@ extension ChatViewModel {
             let cutoffTime = Date().addingTimeInterval(-TransportConfig.uiMigrationCutoffSeconds)
             
             for (oldPeerID, messages) in privateChats {
-                if oldPeerID != peerID {
-                    let oldFingerprint = peerIDToPublicKeyFingerprint[oldPeerID]
+                guard oldPeerID != peerID else { continue }
+
+                let oldFingerprint = peerIDToPublicKeyFingerprint[oldPeerID]
+
+                // Early exit if no messages at all (cheap)
+                guard !messages.isEmpty else { continue }
+
+                // ---------- Case 1: Both fingerprints exist and match ----------
+                if let currentFp = currentFingerprint,
+                   let oldFp = oldFingerprint,
+                   currentFp == oldFp {
                     
-                    // Filter messages to only recent ones
+                    // Fingerprints match - need recent messages for migration
                     let recentMessages = messages.filter { $0.timestamp > cutoffTime }
+                    guard !recentMessages.isEmpty else { continue }
+
+                    migratedMessages.append(contentsOf: recentMessages)
+
+                    // Only remove old peer ID if we migrated ALL its messages
+                    if recentMessages.count == messages.count {
+                        oldPeerIDsToRemove.append(oldPeerID)
+                    } else {
+                        // Keep old messages in original location but don't show in UI
+                        SecureLogger.info("📦 Partially migrating \(recentMessages.count) of \(messages.count) messages from \(oldPeerID)", category: .session)
+                    }
+
+                    SecureLogger.info("📦 Migrating \(recentMessages.count) recent messages from old peer ID \(oldPeerID) to \(peerID) (fingerprint match)", category: .session)
+                }
+                // ---------- Case 2: Missing fingerprint fallback ----------
+                else if currentFingerprint == nil || oldFingerprint == nil {
+                    // Cheap existence check before expensive operations
+                    let hasRelevantMessage = messages.contains { msg in
+                        (msg.sender == senderNickname && msg.sender != nickname) ||
+                        (msg.sender == nickname && msg.recipientNickname == senderNickname)
+                    }
+
+                    guard hasRelevantMessage else { continue }
+
+                    // Now compute recent messages
+                    // Using lazy + filter + prefix is much faster than full sort
+                    let recentMessages = messages
+                        .filter { $0.timestamp > cutoffTime }
+                        .suffix(1000) // Fallback max message check cap
                     
-                    // Skip if no recent messages
                     guard !recentMessages.isEmpty else { continue }
                     
-                    // Check fingerprint match first (most reliable)
-                    if let currentFp = currentFingerprint,
-                       let oldFp = oldFingerprint,
-                       currentFp == oldFp {
-                        migratedMessages.append(contentsOf: recentMessages)
+                    // Convert suffix slice back to Array for processing
+                    let recentMessagesArray = Array(recentMessages)
+
+                    let isRelevantChat = recentMessagesArray.contains { msg in
+                        (msg.sender == senderNickname && msg.sender != nickname) ||
+                        (msg.sender == nickname && msg.recipientNickname == senderNickname)
+                    }
+
+                    if isRelevantChat {
+                        migratedMessages.append(contentsOf: recentMessagesArray)
                         
-                        // Only remove old peer ID if we migrated ALL its messages
-                        if recentMessages.count == messages.count {
+                        // Only remove if all messages were migrated
+                        // Note: If we hit the 1000 message cap, we don't consider all messages migrated
+                        if recentMessagesArray.count == messages.count {
                             oldPeerIDsToRemove.append(oldPeerID)
-                        } else {
-                            // Keep old messages in original location but don't show in UI
-                            SecureLogger.info("📦 Partially migrating \(recentMessages.count) of \(messages.count) messages from \(oldPeerID)", category: .session)
                         }
                         
-                        SecureLogger.info("📦 Migrating \(recentMessages.count) recent messages from old peer ID \(oldPeerID) to \(peerID) (fingerprint match)", category: .session)
-                    } else if currentFingerprint == nil || oldFingerprint == nil {
-                        // Check if this chat contains messages with this sender by nickname
-                        let isRelevantChat = recentMessages.contains { msg in
-                            (msg.sender == senderNickname && msg.sender != nickname) ||
-                            (msg.sender == nickname && msg.recipientNickname == senderNickname)
-                        }
-                        
-                        if isRelevantChat {
-                            migratedMessages.append(contentsOf: recentMessages)
-                            
-                            // Only remove if all messages were migrated
-                            if recentMessages.count == messages.count {
-                                oldPeerIDsToRemove.append(oldPeerID)
-                            }
-                            
-                            SecureLogger.warning("📦 Migrating \(recentMessages.count) recent messages from old peer ID \(oldPeerID) to \(peerID) (nickname match)", category: .session)
-                        }
+                        SecureLogger.warning("📦 Migrating \(recentMessagesArray.count) recent messages from old peer ID \(oldPeerID) to \(peerID) (nickname match)", category: .session)
                     }
                 }
+                // Case 3: Fingerprints exist but don't match - nothing to do, skip entirely
             }
             
             // Remove old peer ID entries
