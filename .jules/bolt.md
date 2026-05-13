@@ -1,0 +1,3 @@
+## 2024-05-13 - String Allocation and Regex Overheads in Swift
+**Learning:** In Swift, calling `.lowercased()` allocates an entirely new string, making it O(n) in both time and space. When used in hot loops or frequently called functions (like message formatting), this causes significant memory pressure. Similarly, inline `NSRegularExpression` with `.regularExpression` string replacements are slow compared to native String methods.
+**Action:** Use `.range(of: options: .caseInsensitive)` for case-insensitive contain checks instead of `.lowercased().contains()`. Replace regex whitespace collapsing with `components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")` for better performance.
