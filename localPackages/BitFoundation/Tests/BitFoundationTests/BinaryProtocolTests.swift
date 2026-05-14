@@ -46,7 +46,7 @@ struct BinaryProtocolTests {
         // Verify recipient
         #expect(decodedPacket.recipientID != nil)
         let decodedRecipientID = decodedPacket.recipientID?.trimmingNullBytes()
-        // TODO: Check if this is intended that the decoding only gets the first 8
+        // The protocol intentionally truncates the recipient ID to BinaryProtocol.recipientIDSize (8 bytes)
         #expect(String(data: decodedRecipientID!, encoding: .utf8) == "abcdef01")
     }
     
