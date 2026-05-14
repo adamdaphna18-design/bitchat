@@ -95,6 +95,7 @@ struct BlockRevealImageView: View {
                         .padding(8)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Cancel sending image")
             }
         }
         .onAppear {
