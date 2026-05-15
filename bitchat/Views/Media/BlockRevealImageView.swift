@@ -94,6 +94,7 @@ struct BlockRevealImageView: View {
                         .foregroundColor(.white)
                         .padding(8)
                 }
+                .accessibilityLabel(String(localized: "common.cancel", defaultValue: "Cancel"))
                 .buttonStyle(.plain)
             }
         }
