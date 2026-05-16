@@ -1,0 +1,3 @@
+## 2024-05-19 - SwiftUI Icon-Only Buttons Accessibility
+**Learning:** In SwiftUI, using `Image(systemName:)` as the content for a `Button` (to create an icon-only button) does not automatically provide accessible text for VoiceOver. This causes screen readers to read generic or non-descriptive labels, creating a poor experience for users with vision impairments.
+**Action:** Always ensure that icon-only buttons using `Image` or `Image(systemName:)` have an explicit `.accessibilityLabel` modifier applied (e.g., `Button(...) { Image(...) }.accessibilityLabel(...)`), or alternatively use `Label` with `.labelStyle(.iconOnly)` which automatically associates the label text with the icon for accessibility.
