@@ -61,6 +61,8 @@ struct WaveformView: View {
                         )
                 }
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Audio Waveform")
         }
         .frame(height: 48)
     }
