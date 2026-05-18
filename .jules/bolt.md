@@ -1,0 +1,3 @@
+## 2024-05-18 - String Memory Allocations in Substring Checks
+**Learning:** Using `.lowercased().contains("string")` for case-insensitive substring checks creates expensive string memory allocations for the entire string, which is particularly bad in hot paths like message formatting or parsing directories.
+**Action:** Always use `.range(of: "string", options: .caseInsensitive) != nil` instead, as it is a native way to check for substring presence without allocating a new lowercased string.
