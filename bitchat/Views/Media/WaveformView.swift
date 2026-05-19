@@ -63,5 +63,7 @@ struct WaveformView: View {
             }
         }
         .frame(height: 48)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "media.waveform", defaultValue: "Audio waveform", comment: "Accessibility label for audio waveform view"))
     }
 }
