@@ -1,0 +1,3 @@
+## 2024-05-18 - Improve VoiceOver support for Custom Media Controls
+**Learning:** Custom visual components (like Canvas waveforms) and icon-only media controls (play, pause, cancel) are completely invisible or improperly read by VoiceOver if they do not have explicit labels. In particular, custom Canvas-based views need `.accessibilityElement(children: .ignore)` alongside `.accessibilityLabel` to group child elements and provide a single description, rather than overwhelming the user.
+**Action:** Always verify that every custom icon-only button and custom drawn graphic has an explicit VoiceOver label via `.accessibilityLabel`, and apply `.accessibilityElement(children: .ignore)` for grouped or Canvas-drawn views.
