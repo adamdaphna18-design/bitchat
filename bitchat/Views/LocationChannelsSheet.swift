@@ -211,6 +211,7 @@ struct LocationChannelsSheet: View {
                                         .font(.bitchatSystem(size: 14))
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityLabel(bookmarks.isBookmarked(channel.geohash) ? "Remove bookmark" : "Add bookmark")
                                 .padding(.leading, 8)
                             }
                         ) {
@@ -363,6 +364,7 @@ struct LocationChannelsSheet: View {
                                     .font(.bitchatSystem(size: 14))
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel(bookmarks.isBookmarked(gh) ? "Remove bookmark" : "Add bookmark")
                             .padding(.leading, 8)
                         }
                     ) {
