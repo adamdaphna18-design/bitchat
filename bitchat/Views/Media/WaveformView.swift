@@ -47,6 +47,8 @@ struct WaveformView: View {
                     }
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text("Audio waveform"))
 
                 if isInteractive, let onSeek = onSeek {
                     Color.clear
