@@ -378,7 +378,8 @@ final class GeoRelayDirectory {
         let lines = text.split(whereSeparator: { $0.isNewline })
         for (idx, raw) in lines.enumerated() {
             guard let line = raw.trimmedOrNilIfEmpty else { continue }
-            if idx == 0 && line.lowercased().contains("relay url") { continue }
+            // ⚡ Bolt: Avoid `.lowercased().contains()` string allocations by using `.range(of:options: .caseInsensitive) != nil`
+            if idx == 0 && line.range(of: "relay url", options: .caseInsensitive) != nil { continue }
             let parts = line.split(separator: ",").map { $0.trimmed }
             guard parts.count >= 3 else { continue }
             var host = parts[0]
