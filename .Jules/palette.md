@@ -1,0 +1,1 @@
+## 2025-05-23 - Accessibility Labels on Icon Buttons\n**Learning:** VoiceOver support in SwiftUI requires explicit `.accessibilityLabel` modifiers for icon-only buttons to convey their purpose.\n**Action:** Always add `.accessibilityLabel` to any `Button` whose content is purely an image/icon.
