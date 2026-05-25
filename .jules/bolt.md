@@ -1,0 +1,3 @@
+## 2024-05-14 - String Allocation and Regex Overhead in Swift
+**Learning:** In Swift, `.lowercased().contains()` creates expensive string memory allocations due to creating a new lowercase string. Similarly, `.replacingOccurrences(of: options: .regularExpression)` introduces slow regex compilation and execution overhead, particularly in hot paths like message formatting or deduplication.
+**Action:** Always prefer native substring checks using `.range(of: options: .caseInsensitive) != nil` and replace simple regex manipulations with native string splitting and joining techniques like `.components(separatedBy:).filter { !$0.isEmpty }.joined()`.
