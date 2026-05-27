@@ -146,7 +146,8 @@ enum ContentNormalizer {
 
         // Trim and collapse whitespace
         let trimmed = simplified.trimmed
-        let collapsed = trimmed.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+        // ⚡ Bolt: Avoid slow regex compilation in hot paths. Native string manipulations are faster.
+        let collapsed = trimmed.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")
 
         // Take prefix and hash
         let prefix = String(collapsed.prefix(prefixLength))
