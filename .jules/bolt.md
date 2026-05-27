@@ -1,0 +1,3 @@
+## 2024-05-18 - String Manipulation Overhead in Hot Paths
+**Learning:** In Swift, using `.lowercased().contains()` creates expensive string memory allocations for every check. Similarly, using `replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)` introduces significant overhead due to regex compilation, especially in hot paths like message deduplication or UI rendering.
+**Action:** Use `.range(of: options: .caseInsensitive) != nil` instead of `.lowercased().contains()`. For whitespace collapse and other simple replacements, prefer native string manipulation methods like `components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")`.

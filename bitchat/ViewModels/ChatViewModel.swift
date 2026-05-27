@@ -2190,8 +2190,9 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
             let hasMentionsHint = content.contains("@")
             let hasHashtagsHint = content.contains("#")
             let hasURLHint = content.contains("://") || content.contains("www.") || content.contains("http")
-            let hasLightningHint = content.lowercased().contains("ln") || content.lowercased().contains("lightning:")
-            let hasCashuHint = content.lowercased().contains("cashu")
+            // ⚡ Bolt: Use .range(of: options: .caseInsensitive) instead of .lowercased().contains() to avoid string allocation
+            let hasLightningHint = content.range(of: "ln", options: .caseInsensitive) != nil || content.range(of: "lightning:", options: .caseInsensitive) != nil
+            let hasCashuHint = content.range(of: "cashu", options: .caseInsensitive) != nil
 
             let hashtagMatches = hasHashtagsHint ? hashtagRegex.matches(in: content, options: [], range: NSRange(location: 0, length: nsLen)) : []
             let mentionMatches = hasMentionsHint ? mentionRegex.matches(in: content, options: [], range: NSRange(location: 0, length: nsLen)) : []
