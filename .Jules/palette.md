@@ -1,0 +1,3 @@
+## 2024-05-18 - Missing Accessibility Labels on Custom Media View Buttons
+**Learning:** In bitchat, custom interactive UI elements like the inline media playback controls (`VoiceNoteView`, `BlockRevealImageView`) commonly use icon-only `Button` elements. Without an explicit `.accessibilityLabel`, VoiceOver ignores them or reads meaningless system image names.
+**Action:** When implementing custom visual elements that rely on `Image(systemName:)` within a `Button`, ALWAYS append `.accessibilityLabel(String(localized: "...", comment: "..."))` immediately after the `.buttonStyle()` to ensure proper screen reader support.
