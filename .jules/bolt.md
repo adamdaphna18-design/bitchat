@@ -1,0 +1,3 @@
+## 2024-06-25 - Avoid String lowercased().contains() and replacingOccurrences() with Regex
+**Learning:** In Swift, using `.lowercased().contains()` creates an expensive string memory allocation for the lowercased string. Also, `.replacingOccurrences(of: options: .regularExpression)` is notoriously slow due to regex compilation and execution overhead, especially in hot paths.
+**Action:** Use `.range(of: options: .caseInsensitive) != nil` for case-insensitive substring checks, and use native string manipulations like `.components(separatedBy:).filter { !$0.isEmpty }.joined(separator: " ")` to collapse whitespace instead of regex replacements.
