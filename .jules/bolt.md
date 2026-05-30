@@ -1,0 +1,3 @@
+## 2024-10-24 - Avoid `.replacingOccurrences(of: options: .regularExpression)` in Swift
+**Learning:** In Swift, using `.replacingOccurrences(of: options: .regularExpression)` compiles the regex on the fly. Doing this inside hot paths (like `ContentNormalizer.normalizedKey` which gets called for every message to deduce duplicate content) incurs significant compilation and execution overhead per call.
+**Action:** Always prefer native string manipulations, e.g. replacing `\s+` replacement with `.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")`, avoiding regex compilation completely in high-frequency functions.
