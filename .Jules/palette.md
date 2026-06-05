@@ -1,0 +1,3 @@
+## 2024-06-05 - Accessible Custom Visual Components and String Interpolation
+**Learning:** Custom visual components like waveform views are invisible to VoiceOver without explicit accessibility modifiers. Additionally, when using dynamic values in `accessibilityValue` (e.g., playback progress), native localized string interpolation `String(localized: "\(value) percent played")` correctly generates format strings for Xcode String Catalogs.
+**Action:** When creating custom visuals, group elements with `.accessibilityElement(children: .ignore)` on the container and add appropriate `.accessibilityLabel` and `.accessibilityValue`. Use native localized string interpolation for dynamic values.
