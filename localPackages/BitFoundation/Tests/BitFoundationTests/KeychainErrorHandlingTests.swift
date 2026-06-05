@@ -146,10 +146,3 @@ struct KeychainErrorHandlingTests {
         }
     }
 }
-
-// Helper error type for tests
-private struct KeychainTestError: Error, CustomStringConvertible {
-    let message: String
-    init(_ message: String) { self.message = message }
-    var description: String { message }
-}

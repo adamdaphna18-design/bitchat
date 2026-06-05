@@ -138,6 +138,12 @@ enum TestError: Error {
     case testFailure(String)
 }
 
+struct KeychainTestError: Error, CustomStringConvertible {
+    let message: String
+    init(_ message: String) { self.message = message }
+    var description: String { message }
+}
+
 func sleep(_ seconds: TimeInterval) async throws {
     try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
 }
