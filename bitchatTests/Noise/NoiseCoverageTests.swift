@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 import CryptoKit
 import Foundation
 import Testing

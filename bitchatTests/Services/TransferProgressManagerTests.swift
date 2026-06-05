@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 import Foundation
 import Combine
 import Testing

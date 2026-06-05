@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // PublicChatE2ETests.swift
 // bitchatTests

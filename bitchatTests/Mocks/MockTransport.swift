@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // MockTransport.swift
 // bitchatTests

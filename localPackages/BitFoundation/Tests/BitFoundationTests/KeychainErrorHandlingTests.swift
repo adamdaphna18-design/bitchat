@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // KeychainErrorHandlingTests.swift
 // bitchatTests

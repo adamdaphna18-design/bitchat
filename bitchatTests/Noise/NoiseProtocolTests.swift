@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // NoiseProtocolTests.swift
 // bitchatTests

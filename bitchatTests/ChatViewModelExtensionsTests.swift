@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // ChatViewModelExtensionsTests.swift
 // bitchatTests

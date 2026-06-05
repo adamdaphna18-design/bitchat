@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // UnifiedPeerServiceTests.swift
 // bitchatTests

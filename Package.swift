@@ -48,7 +48,8 @@ let package = Package(
             name: "bitchatTests",
             dependencies: [
                 "bitchat",
-                .product(name: "BitFoundation", package: "BitFoundation")
+                .product(name: "BitFoundation", package: "BitFoundation"),
+                .product(name: "BitFoundationTestHelpers", package: "BitFoundation")
             ],
             path: "bitchatTests",
             exclude: [
