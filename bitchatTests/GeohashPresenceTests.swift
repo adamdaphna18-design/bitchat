@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // GeohashPresenceTests.swift
 // bitchatTests

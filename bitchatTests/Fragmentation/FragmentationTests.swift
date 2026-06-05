@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // FragmentationTests.swift
 // bitchatTests

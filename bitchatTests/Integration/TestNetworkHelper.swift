@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // TestNetworkHelper.swift
 // bitchatTests

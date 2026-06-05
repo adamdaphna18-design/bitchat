@@ -8,50 +8,50 @@
 
 import Foundation
 import BitFoundation
-@testable import bitchat
 
-final class MockKeychain: KeychainManagerProtocol {
+public final class MockKeychain: KeychainManagerProtocol {
     private var storage: [String: Data] = [:]
     private var serviceStorage: [String: [String: Data]] = [:]
 
     // BCH-01-009: Configurable error simulation for testing
-    var simulatedReadError: KeychainReadResult?
-    var simulatedSaveError: KeychainSaveResult?
+    public var simulatedReadError: KeychainReadResult?
+    public var simulatedSaveError: KeychainSaveResult?
+    public init() {}
 
-    func saveIdentityKey(_ keyData: Data, forKey key: String) -> Bool {
+    public func saveIdentityKey(_ keyData: Data, forKey key: String) -> Bool {
         storage[key] = keyData
         return true
     }
 
-    func getIdentityKey(forKey key: String) -> Data? {
+    public func getIdentityKey(forKey key: String) -> Data? {
         storage[key]
     }
 
-    func deleteIdentityKey(forKey key: String) -> Bool {
+    public func deleteIdentityKey(forKey key: String) -> Bool {
         storage.removeValue(forKey: key)
         return true
     }
 
-    func deleteAllKeychainData() -> Bool {
+    public func deleteAllKeychainData() -> Bool {
         storage.removeAll()
         serviceStorage.removeAll()
         return true
     }
 
-    func secureClear(_ data: inout Data) {
+    public func secureClear(_ data: inout Data) {
         data = Data()
     }
 
-    func secureClear(_ string: inout String) {
+    public func secureClear(_ string: inout String) {
         string = ""
     }
 
-    func verifyIdentityKeyExists() -> Bool {
+    public func verifyIdentityKeyExists() -> Bool {
         storage["identity_noiseStaticKey"] != nil
     }
 
     // BCH-01-009: New methods with proper error classification
-    func getIdentityKeyWithResult(forKey key: String) -> KeychainReadResult {
+    public func getIdentityKeyWithResult(forKey key: String) -> KeychainReadResult {
         if let simulated = simulatedReadError {
             return simulated
         }
@@ -61,7 +61,7 @@ final class MockKeychain: KeychainManagerProtocol {
         return .itemNotFound
     }
 
-    func saveIdentityKeyWithResult(_ keyData: Data, forKey key: String) -> KeychainSaveResult {
+    public func saveIdentityKeyWithResult(_ keyData: Data, forKey key: String) -> KeychainSaveResult {
         if let simulated = simulatedSaveError {
             return simulated
         }
@@ -71,27 +71,27 @@ final class MockKeychain: KeychainManagerProtocol {
 
     // MARK: - Generic Data Storage (consolidated from KeychainHelper)
 
-    func save(key: String, data: Data, service: String, accessible: CFString?) {
+    public func save(key: String, data: Data, service: String, accessible: CFString?) {
         if serviceStorage[service] == nil {
             serviceStorage[service] = [:]
         }
         serviceStorage[service]?[key] = data
     }
 
-    func load(key: String, service: String) -> Data? {
+    public func load(key: String, service: String) -> Data? {
         serviceStorage[service]?[key]
     }
 
-    func delete(key: String, service: String) {
+    public func delete(key: String, service: String) {
         serviceStorage[service]?.removeValue(forKey: key)
     }
 }
 
 /// Typealias for backwards compatibility with tests using MockKeychainHelper
-typealias MockKeychainHelper = MockKeychain
+public typealias MockKeychainHelper = MockKeychain
 
 /// Mock keychain that tracks secureClear calls for testing DH secret clearing
-final class TrackingMockKeychain: KeychainManagerProtocol {
+public final class TrackingMockKeychain: KeychainManagerProtocol {
     private var storage: [String: Data] = [:]
     private var serviceStorage: [String: [String: Data]] = [:]
 
@@ -101,72 +101,73 @@ final class TrackingMockKeychain: KeychainManagerProtocol {
     private var _secureClearStringCallCount = 0
 
     // BCH-01-009: Configurable error simulation for testing
-    var simulatedReadError: KeychainReadResult?
-    var simulatedSaveError: KeychainSaveResult?
+    public var simulatedReadError: KeychainReadResult?
+    public var simulatedSaveError: KeychainSaveResult?
+    public init() {}
 
-    var secureClearDataCallCount: Int {
+    public var secureClearDataCallCount: Int {
         lock.lock()
         defer { lock.unlock() }
         return _secureClearDataCallCount
     }
 
-    var secureClearStringCallCount: Int {
+    public var secureClearStringCallCount: Int {
         lock.lock()
         defer { lock.unlock() }
         return _secureClearStringCallCount
     }
 
-    var totalSecureClearCallCount: Int {
+    public var totalSecureClearCallCount: Int {
         return secureClearDataCallCount + secureClearStringCallCount
     }
 
-    func resetCounts() {
+    public func resetCounts() {
         lock.lock()
         defer { lock.unlock() }
         _secureClearDataCallCount = 0
         _secureClearStringCallCount = 0
     }
 
-    func saveIdentityKey(_ keyData: Data, forKey key: String) -> Bool {
+    public func saveIdentityKey(_ keyData: Data, forKey key: String) -> Bool {
         storage[key] = keyData
         return true
     }
 
-    func getIdentityKey(forKey key: String) -> Data? {
+    public func getIdentityKey(forKey key: String) -> Data? {
         storage[key]
     }
 
-    func deleteIdentityKey(forKey key: String) -> Bool {
+    public func deleteIdentityKey(forKey key: String) -> Bool {
         storage.removeValue(forKey: key)
         return true
     }
 
-    func deleteAllKeychainData() -> Bool {
+    public func deleteAllKeychainData() -> Bool {
         storage.removeAll()
         serviceStorage.removeAll()
         return true
     }
 
-    func secureClear(_ data: inout Data) {
+    public func secureClear(_ data: inout Data) {
         lock.lock()
         _secureClearDataCallCount += 1
         lock.unlock()
         data = Data()
     }
 
-    func secureClear(_ string: inout String) {
+    public func secureClear(_ string: inout String) {
         lock.lock()
         _secureClearStringCallCount += 1
         lock.unlock()
         string = ""
     }
 
-    func verifyIdentityKeyExists() -> Bool {
+    public func verifyIdentityKeyExists() -> Bool {
         storage["identity_noiseStaticKey"] != nil
     }
 
     // BCH-01-009: New methods with proper error classification
-    func getIdentityKeyWithResult(forKey key: String) -> KeychainReadResult {
+    public func getIdentityKeyWithResult(forKey key: String) -> KeychainReadResult {
         if let simulated = simulatedReadError {
             return simulated
         }
@@ -176,7 +177,7 @@ final class TrackingMockKeychain: KeychainManagerProtocol {
         return .itemNotFound
     }
 
-    func saveIdentityKeyWithResult(_ keyData: Data, forKey key: String) -> KeychainSaveResult {
+    public func saveIdentityKeyWithResult(_ keyData: Data, forKey key: String) -> KeychainSaveResult {
         if let simulated = simulatedSaveError {
             return simulated
         }
@@ -184,18 +185,18 @@ final class TrackingMockKeychain: KeychainManagerProtocol {
         return .success
     }
 
-    func save(key: String, data: Data, service: String, accessible: CFString?) {
+    public func save(key: String, data: Data, service: String, accessible: CFString?) {
         if serviceStorage[service] == nil {
             serviceStorage[service] = [:]
         }
         serviceStorage[service]?[key] = data
     }
 
-    func load(key: String, service: String) -> Data? {
+    public func load(key: String, service: String) -> Data? {
         serviceStorage[service]?[key]
     }
 
-    func delete(key: String, service: String) {
+    public func delete(key: String, service: String) {
         serviceStorage[service]?.removeValue(forKey: key)
     }
 }

@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // NotificationBlockingTests.swift
 // bitchatTests

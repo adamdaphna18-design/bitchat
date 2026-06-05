@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // BLEServiceCoreTests.swift
 // bitchatTests

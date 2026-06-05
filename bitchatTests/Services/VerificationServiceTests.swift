@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 import XCTest
 @testable import bitchat
 

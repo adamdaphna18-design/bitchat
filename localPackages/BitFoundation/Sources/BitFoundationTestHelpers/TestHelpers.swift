@@ -8,27 +8,26 @@
 
 import Foundation
 import CryptoKit
-@testable import BitFoundation
+import BitFoundation
 
-// TODO: Create a module for test helpers
-final class TestHelpers {
+public final class TestHelpers {
     
     // MARK: - Key Generation
     
-    static func generateTestKeyPair() -> (privateKey: Curve25519.KeyAgreement.PrivateKey, publicKey: Curve25519.KeyAgreement.PublicKey) {
+    public static func generateTestKeyPair() -> (privateKey: Curve25519.KeyAgreement.PrivateKey, publicKey: Curve25519.KeyAgreement.PublicKey) {
         let privateKey = Curve25519.KeyAgreement.PrivateKey()
         let publicKey = privateKey.publicKey
         return (privateKey, publicKey)
     }
     
-    static func generateTestIdentity(peerID: String, nickname: String) -> (peerID: String, nickname: String, privateKey: Curve25519.KeyAgreement.PrivateKey, publicKey: Curve25519.KeyAgreement.PublicKey) {
+    public static func generateTestIdentity(peerID: String, nickname: String) -> (peerID: String, nickname: String, privateKey: Curve25519.KeyAgreement.PrivateKey, publicKey: Curve25519.KeyAgreement.PublicKey) {
         let (privateKey, publicKey) = generateTestKeyPair()
         return (peerID: peerID, nickname: nickname, privateKey: privateKey, publicKey: publicKey)
     }
     
     // MARK: - Message Creation
     
-    static func createTestMessage(
+    public static func createTestMessage(
         content: String = TestConstants.testMessage1,
         sender: String = TestConstants.testNickname1,
         senderPeerID: PeerID = PeerID(str: UUID().uuidString),
@@ -50,7 +49,7 @@ final class TestHelpers {
         )
     }
     
-    static func createTestPacket(
+    public static func createTestPacket(
         type: UInt8 = 0x01,
         senderID: PeerID = PeerID(str: UUID().uuidString),
         recipientID: PeerID? = nil,
@@ -71,7 +70,7 @@ final class TestHelpers {
     
     // MARK: - Data Generation
     
-    static func generateRandomData(length: Int) -> Data {
+    public static func generateRandomData(length: Int) -> Data {
         var data = Data(count: length)
         _ = data.withUnsafeMutableBytes { bytes in
             SecRandomCopyBytes(kSecRandomDefault, length, bytes.baseAddress!)
@@ -79,13 +78,13 @@ final class TestHelpers {
         return data
     }
     
-    static func generateTestPeerID() -> String {
+    public static func generateTestPeerID() -> String {
         return "PEER" + UUID().uuidString.prefix(8)
     }
     
     // MARK: - Async Helpers
     
-    static func waitFor(_ condition: @escaping () -> Bool, timeout: TimeInterval = TestConstants.defaultTimeout) async throws {
+    public static func waitFor(_ condition: @escaping () -> Bool, timeout: TimeInterval = TestConstants.defaultTimeout) async throws {
         let start = Date()
         while !condition() {
             if Date().timeIntervalSince(start) > timeout {
@@ -96,7 +95,7 @@ final class TestHelpers {
     }
 
     @MainActor
-    static func waitUntil(
+    public static func waitUntil(
         _ condition: @escaping () -> Bool,
         timeout: TimeInterval = TestConstants.defaultTimeout,
         pollInterval: TimeInterval = 0.01
@@ -111,7 +110,7 @@ final class TestHelpers {
         return true
     }
     
-    static func expectAsync<T>(
+    public static func expectAsync<T>(
         timeout: TimeInterval = TestConstants.defaultTimeout,
         operation: @escaping () async throws -> T
     ) async throws -> T {
@@ -132,12 +131,12 @@ final class TestHelpers {
     }
 }
 
-enum TestError: Error {
+public enum TestError: Error {
     case timeout
     case unexpectedValue
     case testFailure(String)
 }
 
-func sleep(_ seconds: TimeInterval) async throws {
+public func sleep(_ seconds: TimeInterval) async throws {
     try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
 }

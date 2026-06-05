@@ -1,3 +1,5 @@
+import BitFoundationTestHelpers
+
 //
 // NostrTransportTests.swift
 // bitchat
