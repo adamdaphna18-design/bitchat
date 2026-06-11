@@ -1308,16 +1308,18 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
         }
 
         var chats = privateChats
-        for (peerID, items) in chats {
-            let filtered = items.filter { $0.id != messageID }
-            if filtered.count != items.count {
-                if filtered.isEmpty {
+        for (peerID, var items) in chats {
+            // Bolt: Optimization - Avoid O(N) intermediate array allocations per chat by
+            // using firstIndex and in-place remove(at:) instead of filtering the entire array.
+            if let idx = items.firstIndex(where: { $0.id == messageID }) {
+                if removedMessage == nil {
+                    removedMessage = items[idx]
+                }
+                items.remove(at: idx)
+                if items.isEmpty {
                     chats.removeValue(forKey: peerID)
                 } else {
-                    chats[peerID] = filtered
-                }
-                if removedMessage == nil {
-                    removedMessage = items.first(where: { $0.id == messageID })
+                    chats[peerID] = items
                 }
             }
         }
