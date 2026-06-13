@@ -455,7 +455,8 @@ extension GossipSyncManager {
 
     func _messageCount(for peerID: PeerID) -> Int {
         queue.sync {
-            messages.allPackets { _ in true }.filter { PeerID(hexData: $0.senderID) == peerID }.count
+            // ⚡ Bolt: Optimized counting by using .reduce instead of .filter to avoid intermediate array allocations in hot paths.
+            messages.allPackets { _ in true }.reduce(0) { $0 + (PeerID(hexData: $1.senderID) == peerID ? 1 : 0) }
         }
     }
 }

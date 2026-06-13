@@ -107,7 +107,8 @@ public final class GeohashParticipantTracker: ObservableObject {
     public func participantCount(for geohash: String) -> Int {
         let cutoff = Date().addingTimeInterval(activityCutoff)
         let map = participants[geohash] ?? [:]
-        return map.values.filter { $0 >= cutoff }.count
+        // ⚡ Bolt: Optimized counting by using .reduce instead of .filter to avoid intermediate array allocations in hot paths.
+        return map.values.reduce(0) { $0 + ($1 >= cutoff ? 1 : 0) }
     }
 
     /// Get the visible people list for the active geohash (read-only query)
