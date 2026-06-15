@@ -49,6 +49,11 @@ struct VoiceNoteView: View {
                     .background(Circle().fill(Color.green))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(
+                playback.isPlaying
+                ? String(localized: "Pause voice note", comment: "Accessibility label to pause voice note")
+                : String(localized: "Play voice note", comment: "Accessibility label to play voice note")
+            )
 
             WaveformView(
                 samples: samples,
@@ -73,6 +78,7 @@ struct VoiceNoteView: View {
                         .foregroundColor(.white)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Cancel sending", comment: "Accessibility label to cancel sending media"))
             }
         }
         .padding(12)
