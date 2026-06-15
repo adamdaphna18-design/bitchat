@@ -1,0 +1,3 @@
+## 2024-06-25 - Avoid slow Regex compilation in hot paths
+**Learning:** `replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)` is significantly slower than native string manipulation (`components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")`) due to the overhead of regular expression compilation and execution, especially when called repeatedly in hot paths like message deduplication.
+**Action:** Replace regular expression-based string collapse with native `components(separatedBy:)` in high-frequency string normalization paths to reduce cpu time.
