@@ -49,6 +49,11 @@ struct VoiceNoteView: View {
                     .background(Circle().fill(Color.green))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(
+                playback.isPlaying
+                    ? String(localized: "Pause voice note", comment: "Accessibility label for pausing a voice note")
+                    : String(localized: "Play voice note", comment: "Accessibility label for playing a voice note")
+            )
 
             WaveformView(
                 samples: samples,
@@ -59,6 +64,9 @@ struct VoiceNoteView: View {
                 },
                 isInteractive: playback.isPlaying
             )
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(String(localized: "Voice note playback progress", comment: "Accessibility label for the voice note waveform"))
+            .accessibilityValue(String(localized: "\(Int(playback.progress * 100)) percent played", comment: "Accessibility value indicating the playback percentage of the voice note"))
 
             Text(playbackLabel)
                 .font(.bitchatSystem(size: 13, design: .monospaced))
@@ -73,6 +81,7 @@ struct VoiceNoteView: View {
                         .foregroundColor(.white)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Cancel sending voice note", comment: "Accessibility label for the cancel sending voice note button"))
             }
         }
         .padding(12)
