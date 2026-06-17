@@ -1,0 +1,3 @@
+## 2024-06-17 - Dynamic Accessibility Labels in SwiftUI Media Controls
+**Learning:** For interactive media elements where visual states shift continuously (e.g., a "Play/Pause" button switching icons), wrapping dynamic string lookups or ternary logic within the `accessibilityLabel` modifier correctly surfaces those localized strings to VoiceOver, keeping audio representation in sync with visual representation.
+**Action:** When an interactive element's system image dynamically alters based on state variables (like `isPlaying`), ensure its `accessibilityLabel` resolves to localized strings identically synced to that state.
