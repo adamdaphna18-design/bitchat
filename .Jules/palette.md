@@ -1,0 +1,3 @@
+## 2024-05-18 - SwiftUI Custom Media Components Accessibility
+**Learning:** For purely visual SwiftUI components like custom waveform views (`WaveformView`) or dynamic icon-only buttons (`VoiceNoteView`), explicit `.accessibilityElement(children: .ignore)` combined with a semantic `.accessibilityLabel` and dynamic `.accessibilityValue` is necessary to present accurate VoiceOver information without overwhelming the user with the visual implementation details.
+**Action:** When creating visual representation layers (e.g. graphs, waveforms, progress bars), always wrap the layout group with `.accessibilityElement(children: .ignore)` and provide appropriate string-catalog localized `.accessibilityLabel` and `.accessibilityValue` to convey the semantic meaning of the graphic.
