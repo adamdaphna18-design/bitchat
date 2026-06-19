@@ -1,0 +1,3 @@
+## 2026-06-19 - SwiftUI Localization for Accessibility Labels
+**Learning:** The project uses 'Localizable.xcstrings' and expects accessibility strings to be wrapped in 'String(localized: "...", comment: "...")' rather than just passing raw strings. It correctly extracts these literal arguments directly to the string catalog. Also learned that dynamic string interpolation for VoiceOver works natively inside this localized wrapper.
+**Action:** When adding accessibility labels in SwiftUI for this project, always use the 'String(localized:comment:)' pattern to ensure VoiceOver falls back gracefully and translation tools pick up the keys properly.
