@@ -1744,7 +1744,7 @@ extension BLEService: CBCentralManagerDelegate {
         }
         
         // Budget: limit simultaneous central links (connected + connecting)
-        let currentCentralLinks = peripherals.values.filter { $0.isConnected || $0.isConnecting }.count
+        let currentCentralLinks = peripherals.values.reduce(0) { $0 + (($1.isConnected || $1.isConnecting) ? 1 : 0) } /* ⚡ Bolt: Prevent intermediate array allocation */
         if currentCentralLinks >= maxCentralLinks {
             // Enqueue as candidate; we'll attempt later as slots open
             connectionCandidates.append(ConnectionCandidate(peripheral: peripheral, rssi: rssiValue, name: String(advertisedName), isConnectable: isConnectable, discoveredAt: Date()))
@@ -1961,7 +1961,7 @@ extension BLEService {
     private func tryConnectFromQueue() {
         guard let central = centralManager, central.state == .poweredOn else { return }
         // Check budget and rate limit
-        let current = peripherals.values.filter { $0.isConnected || $0.isConnecting }.count
+        let current = peripherals.values.reduce(0) { $0 + (($1.isConnected || $1.isConnecting) ? 1 : 0) } /* ⚡ Bolt: Prevent intermediate array allocation */
         guard current < maxCentralLinks else { return }
         let delta = Date().timeIntervalSince(lastGlobalConnectAttempt)
         guard delta >= connectRateLimitInterval else {
@@ -2740,7 +2740,7 @@ extension BLEService {
 
         let peerSummary = collectionsQueue.sync {
             (
-                connected: peers.values.filter { $0.isConnected }.count,
+                connected: peers.values.reduce(0) { $0 + ($1.isConnected ? 1 : 0) } /* ⚡ Bolt: Prevent intermediate array allocation */,
                 known: peers.count,
                 candidates: connectionCandidates.count
             )
@@ -3724,7 +3724,7 @@ extension BLEService {
             }
             // In sparse graphs (<=2 neighbors), keep the pending relay to ensure bridging.
             // In denser graphs, cancel the pending relay to reduce redundant floods.
-            let connectedCount = collectionsQueue.sync { peers.values.filter { $0.isConnected }.count }
+            let connectedCount = collectionsQueue.sync { peers.values.reduce(0) { $0 + ($1.isConnected ? 1 : 0) } /* ⚡ Bolt: Prevent intermediate array allocation */ }
             if connectedCount > 2 {
                 collectionsQueue.async(flags: .barrier) { [weak self] in
                     if let task = self?.scheduledRelays.removeValue(forKey: messageID) {
@@ -3790,7 +3790,7 @@ extension BLEService {
         // Relay if TTL > 1 and we're not the original sender
         // Relay decision and scheduling (extracted via RelayController)
         do {
-            let degree = collectionsQueue.sync { peers.values.filter { $0.isConnected }.count }
+            let degree = collectionsQueue.sync { peers.values.reduce(0) { $0 + ($1.isConnected ? 1 : 0) } /* ⚡ Bolt: Prevent intermediate array allocation */ }
             let decision = RelayController.decide(
                 ttl: packet.ttl,
                 senderIsSelf: senderID == myPeerID,
@@ -4312,7 +4312,7 @@ extension BLEService {
         
         // Adaptive announce: reduce frequency when we have connected peers
         let now = Date()
-        let connectedCount = collectionsQueue.sync { peers.values.filter { $0.isConnected }.count }
+        let connectedCount = collectionsQueue.sync { peers.values.reduce(0) { $0 + ($1.isConnected ? 1 : 0) } /* ⚡ Bolt: Prevent intermediate array allocation */ }
         let elapsed = now.timeIntervalSince(lastAnnounceSent)
         if connectedCount == 0 {
             // Discovery mode: keep frequent announces
@@ -4569,12 +4569,12 @@ extension BLEService {
         // Base threshold when connected
         var threshold = TransportConfig.bleDynamicRSSIThresholdDefault
         // If we're at budget or queue is large, prefer closer peers
-        let linkCount = peripherals.values.filter { $0.isConnected || $0.isConnecting }.count
+        let linkCount = peripherals.values.reduce(0) { $0 + (($1.isConnected || $1.isConnecting) ? 1 : 0) } /* ⚡ Bolt: Prevent intermediate array allocation */
         if linkCount >= maxCentralLinks || connectionCandidates.count > TransportConfig.bleConnectionCandidatesMax {
             threshold = TransportConfig.bleRSSIConnectedThreshold
         }
         // If we have many recent timeouts, raise further
-        let recentTimeouts = recentConnectTimeouts.filter { Date().timeIntervalSince($0.value) < TransportConfig.bleRecentTimeoutWindowSeconds }.count
+        let recentTimeouts = recentConnectTimeouts.values.reduce(0) { $0 + (Date().timeIntervalSince($1) < TransportConfig.bleRecentTimeoutWindowSeconds ? 1 : 0) } /* ⚡ Bolt: Prevent intermediate array allocation */
         if recentTimeouts >= TransportConfig.bleRecentTimeoutCountThreshold {
             threshold = max(threshold, TransportConfig.bleRSSIHighTimeoutThreshold)
         }
