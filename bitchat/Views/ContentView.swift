@@ -1100,6 +1100,7 @@ private extension ContentView {
                     .foregroundColor(.red)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(String(localized: "Cancel", comment: "VoiceOver label for cancel button"))
         }
         .padding(10)
         .background(
@@ -1162,7 +1163,7 @@ private extension ContentView {
                 .frame(width: 36, height: 36)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Choose photo")
+        .accessibilityLabel(String(localized: "Photo library", comment: "VoiceOver label for photo library button"))
         #endif
     }
 
