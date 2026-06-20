@@ -108,7 +108,8 @@ struct ContentView: View {
     private var peopleSheetActiveCount: Int {
         switch locationManager.selectedChannel {
         case .mesh:
-            return viewModel.allPeers.filter { $0.peerID != viewModel.meshService.myPeerID }.count
+            // ⚡ Bolt: Use .reduce(0) instead of .filter().count to avoid intermediate array allocation
+            return viewModel.allPeers.reduce(0) { $0 + ($1.peerID != viewModel.meshService.myPeerID ? 1 : 0) }
         case .location:
             return viewModel.visibleGeohashPeople().count
         }

@@ -28,7 +28,8 @@ struct InputValidator {
         let controlChars = CharacterSet.controlCharacters
         if !trimmed.unicodeScalars.allSatisfy({ !controlChars.contains($0) }) {
             // Log rejection for monitoring, without exposing actual content for privacy
-            let controlCharCount = trimmed.unicodeScalars.filter { controlChars.contains($0) }.count
+            // ⚡ Bolt: Use .reduce(0) instead of .filter().count to avoid intermediate array allocation
+            let controlCharCount = trimmed.unicodeScalars.reduce(0) { $0 + (controlChars.contains($1) ? 1 : 0) }
             SecureLogger.debug(
                 "Input validation rejected string (length: \(trimmed.count), control chars: \(controlCharCount))",
                 category: .security

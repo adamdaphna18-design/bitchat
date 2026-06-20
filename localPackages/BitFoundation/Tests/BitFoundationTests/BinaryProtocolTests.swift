@@ -383,7 +383,8 @@ struct BinaryProtocolTests {
         
         // Different payload sizes (within <=2048) may map to the same bucket depending on compression.
         // Require at least one padded size to be present.
-        #expect(encodedSizes.filter { $0 <= 2048 }.count >= 1, "Expected at least one padded size up to 2048, got \(encodedSizes)")
+        // ⚡ Bolt: Use .reduce(0) instead of .filter().count to avoid intermediate array allocation
+        #expect(encodedSizes.reduce(0) { $0 + ($1 <= 2048 ? 1 : 0) } >= 1, "Expected at least one padded size up to 2048, got \(encodedSizes)")
     }
 
     @Test func invalidPKCS7PaddingIsRejected() throws {
