@@ -933,6 +933,9 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
                     if chats[currentPeerID] == nil {
                         chats[currentPeerID] = []
                     }
+                    for msg in oldMessages {
+                        privateChatManager.recordMessageID(msg.id)
+                    }
                     chats[currentPeerID]?.append(contentsOf: oldMessages)
                     // Sort by timestamp
                     chats[currentPeerID]?.sort { $0.timestamp < $1.timestamp }
@@ -1307,6 +1310,9 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
             removedMessage = removedMessage ?? storeRemoved
         }
 
+        // Remove from seen message IDs
+        privateChatManager.removeMessageID(messageID)
+
         var chats = privateChats
         for (peerID, items) in chats {
             let filtered = items.filter { $0.id != messageID }
@@ -1346,6 +1352,7 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
         )
         if privateChats[peerID] == nil { privateChats[peerID] = [] }
         privateChats[peerID]?.append(systemMessage)
+        privateChatManager.recordMessageID(systemMessage.id)
         objectWillChange.send()
     }
     
@@ -1692,6 +1699,9 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
         // Force save any pending identity changes (verifications, favorites, etc)
         identityManager.forceSave()
 
+        // Save private chat manager state
+        privateChatManager.saveState()
+
         // Verify identity key is still there
         _ = keychain.verifyIdentityKeyExists()
     }
@@ -1939,6 +1949,7 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
         // Clear read receipt tracking
         sentReadReceipts.removeAll()
         deduplicationService.clearAll()
+        privateChatManager.clearAllMessageIDs()
 
         // Clear all caches
         invalidateEncryptionCache()
@@ -3295,6 +3306,7 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
                         deliveryStatus: msg.deliveryStatus
                     )
                     privateChats[stableKeyHex]?.append(updated)
+                    privateChatManager.recordMessageID(updated.id)
                 }
                 privateChats[stableKeyHex]?.sort { $0.timestamp < $1.timestamp }
                 privateChats.removeValue(forKey: peerID)
@@ -3588,30 +3600,27 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
             }
         }
         
-        // Update in main messages
+        // Optimized update via PrivateChatManager registry (O(1))
+        if let msg = privateChatManager.message(withID: messageID) {
+            if !shouldSkipUpdate(currentStatus: msg.deliveryStatus, newStatus: status) {
+                msg.deliveryStatus = status
+                DispatchQueue.main.async { [weak self] in
+                    self?.objectWillChange.send()
+                }
+            }
+            return
+        }
+
+        // Fallback for public messages or unregistered private messages (still O(N))
         if let index = messages.firstIndex(where: { $0.id == messageID }) {
             let currentStatus = messages[index].deliveryStatus
             if !shouldSkipUpdate(currentStatus: currentStatus, newStatus: status) {
                 messages[index].deliveryStatus = status
+                DispatchQueue.main.async { [weak self] in
+                    self?.objectWillChange.send()
+                }
             }
         }
-        
-        // Update in private chats
-        for (peerID, chatMessages) in privateChats {
-            guard let index = chatMessages.firstIndex(where: { $0.id == messageID }) else { continue }
-            
-            let currentStatus = chatMessages[index].deliveryStatus
-            guard !shouldSkipUpdate(currentStatus: currentStatus, newStatus: status) else { continue }
-            
-            // Update delivery status directly (BitchatMessage is a class/reference type)
-            privateChats[peerID]?[index].deliveryStatus = status
-        }
-        
-        // Trigger UI update for delivery status change
-        DispatchQueue.main.async { [weak self] in
-            self?.objectWillChange.send()
-        }
-        
     }
     
     // MARK: - Helper for System Messages

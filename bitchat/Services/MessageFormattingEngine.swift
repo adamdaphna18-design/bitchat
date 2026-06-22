@@ -372,9 +372,14 @@ final class MessageFormattingEngine {
         }
 
         // Add bolt11/lnurl (avoiding overlaps with lightning scheme and URLs)
-        let occupied = urlMatches.map { $0.range } + lightningMatches.map { $0.range(at: 0) }
         func overlapsOccupied(_ r: NSRange) -> Bool {
-            occupied.contains { NSIntersectionRange(r, $0).length > 0 }
+            for urlMatch in urlMatches {
+                if NSIntersectionRange(r, urlMatch.range).length > 0 { return true }
+            }
+            for lightningMatch in lightningMatches {
+                if NSIntersectionRange(r, lightningMatch.range(at: 0)).length > 0 { return true }
+            }
+            return false
         }
 
         for match in bolt11Matches where !overlapsMention(match.range(at: 0)) && !overlapsOccupied(match.range(at: 0)) {

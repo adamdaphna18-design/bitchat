@@ -81,6 +81,7 @@ extension ChatViewModel {
             privateChats[peerID] = []
         }
         privateChats[peerID]?.append(message)
+        privateChatManager.recordMessageID(messageID, message: message)
         
         // Trigger UI update for sent message
         objectWillChange.send()
@@ -137,6 +138,7 @@ extension ChatViewModel {
         }
         
         privateChats[peerID]?.append(message)
+        privateChatManager.recordMessageID(messageID, message: message)
         objectWillChange.send()
 
         // Resolve recipient hex from mapping
@@ -212,12 +214,7 @@ extension ChatViewModel {
         }
 
         // Duplicate check
-        if privateChats[convKey]?.contains(where: { $0.id == messageId }) == true { return }
-        for (_, arr) in privateChats {
-            if arr.contains(where: { $0.id == messageId }) {
-                return
-            }
-        }
+        if isDuplicateMessage(messageId, targetPeerID: convKey) { return }
         
         let senderName = displayNameForNostrPubkey(senderPubkey)
         let msg = BitchatMessage(
@@ -236,6 +233,7 @@ extension ChatViewModel {
             privateChats[convKey] = []
         }
         privateChats[convKey]?.append(msg)
+        privateChatManager.recordMessageID(messageId, message: msg)
         
         let isViewing = selectedPrivateChatPeer == convKey
         let wasReadBefore = sentReadReceipts.contains(messageId)
@@ -471,6 +469,7 @@ extension ChatViewModel {
             var chats = privateChats
             chats[peerID, default: []].append(message)
             privateChats = chats
+            privateChatManager.recordMessageID(message.id, message: message)
             trimMessagesIfNeeded()
         } else {
             let (displayName, senderPeerID) = currentPublicSender()
@@ -733,6 +732,7 @@ extension ChatViewModel {
                     // Add any messages that aren't already in the ephemeral storage
                     let existingMessageIds = Set(privateChats[peerID]?.map { $0.id } ?? [])
                     for nostrMessage in nostrMessages {
+                        privateChatManager.recordMessageID(nostrMessage.id, message: nostrMessage)
                         if !existingMessageIds.contains(nostrMessage.id) {
                             privateChats[peerID]?.append(nostrMessage)
                         }
@@ -790,16 +790,11 @@ extension ChatViewModel {
     }
 
     func isDuplicateMessage(_ messageId: String, targetPeerID: PeerID) -> Bool {
-        if privateChats[targetPeerID]?.contains(where: { $0.id == messageId }) == true {
-            return true
-        }
-        for (_, messages) in privateChats where messages.contains(where: { $0.id == messageId }) {
-            return true
-        }
-        return false
+        return privateChatManager.isDuplicate(messageId)
     }
     
     func addMessageToPrivateChatsIfNeeded(_ message: BitchatMessage, targetPeerID: PeerID) {
+        privateChatManager.recordMessageID(message.id, message: message)
         if privateChats[targetPeerID] == nil {
             privateChats[targetPeerID] = []
         }
@@ -821,6 +816,7 @@ extension ChatViewModel {
             return
         }
         
+        privateChatManager.recordMessageID(message.id, message: message)
         if privateChats[ephemeralPeerID] == nil {
             privateChats[ephemeralPeerID] = []
         }
@@ -1028,6 +1024,9 @@ extension ChatViewModel {
             
             // Add migrated messages to new peer ID
             if !migratedMessages.isEmpty {
+                for msg in migratedMessages {
+                    privateChatManager.recordMessageID(msg.id, message: msg)
+                }
                 if privateChats[peerID] == nil {
                     privateChats[peerID] = []
                 }

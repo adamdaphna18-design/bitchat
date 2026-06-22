@@ -19,6 +19,8 @@ final class PrivateChatManager: ObservableObject {
 
     private var selectedPeerFingerprint: String? = nil
     var sentReadReceipts: Set<String> = []  // Made accessible for ChatViewModel
+    private var seenMessageIDs: Set<String> = []
+    private var messageRegistry: [String: BitchatMessage] = [:]
 
     weak var meshService: Transport?
     // Route acks/receipts via MessageRouter (chooses mesh or Nostr)
@@ -28,6 +30,7 @@ final class PrivateChatManager: ObservableObject {
 
     init(meshService: Transport? = nil) {
         self.meshService = meshService
+        loadSeenMessageIDs()
     }
 
     // Cap for messages stored per private chat
@@ -58,6 +61,7 @@ final class PrivateChatManager: ObservableObject {
 
                 let existingMessageIds = Set(privateChats[peerID]?.map { $0.id } ?? [])
                 for message in nostrMessages {
+                    recordMessageID(message.id, message: message)
                     if !existingMessageIds.contains(message.id) {
                         // Update senderPeerID for correct read receipts
                         let updatedMessage = BitchatMessage(
@@ -86,7 +90,7 @@ final class PrivateChatManager: ObservableObject {
                     }
                 }
 
-                privateChats[peerID]?.sort { $0.timestamp < $1.timestamp }
+                sanitizeChat(for: peerID)
 
                 if hasUnreadMessages {
                     unreadMessages.insert(peerID)
@@ -127,6 +131,7 @@ final class PrivateChatManager: ObservableObject {
 
                 if let tempMessages = privateChats[tempPeerID] {
                     for message in tempMessages {
+                        recordMessageID(message.id, message: message)
                         if !existingMessageIds.contains(message.id) {
                             let updatedMessage = BitchatMessage(
                                 id: message.id,
@@ -157,7 +162,7 @@ final class PrivateChatManager: ObservableObject {
             }
 
             if consolidatedCount > 0 {
-                privateChats[peerID]?.sort { $0.timestamp < $1.timestamp }
+                sanitizeChat(for: peerID)
                 SecureLogger.info("📥 Consolidated \(consolidatedCount) Nostr messages from temporary peer IDs to \(peerNickname)", category: .session)
             }
         }
@@ -209,25 +214,36 @@ final class PrivateChatManager: ObservableObject {
         selectedPeerFingerprint = nil
     }
 
-    /// Remove duplicate messages by ID and keep chronological order
+    /// Remove duplicate messages by ID and keep chronological order, while enforcing the storage cap.
     func sanitizeChat(for peerID: PeerID) {
         guard let arr = privateChats[peerID] else { return }
-        if arr.count <= 1 {
-            return
+
+        // 1. De-duplicate and Sort
+        var deduped: [BitchatMessage] = []
+        if arr.count > 1 {
+            var indexByID: [String: Int] = [:]
+            indexByID.reserveCapacity(arr.count)
+            deduped.reserveCapacity(arr.count)
+
+            for msg in arr.sorted(by: { $0.timestamp < $1.timestamp }) {
+                if let existing = indexByID[msg.id] {
+                    deduped[existing] = msg
+                } else {
+                    indexByID[msg.id] = deduped.count
+                    deduped.append(msg)
+                }
+            }
+        } else {
+            deduped = arr
         }
 
-        var indexByID: [String: Int] = [:]
-        indexByID.reserveCapacity(arr.count)
-        var deduped: [BitchatMessage] = []
-        deduped.reserveCapacity(arr.count)
-
-        for msg in arr.sorted(by: { $0.timestamp < $1.timestamp }) {
-            if let existing = indexByID[msg.id] {
-                deduped[existing] = msg
-            } else {
-                indexByID[msg.id] = deduped.count
-                deduped.append(msg)
+        // 2. Enforce Cap
+        if deduped.count > privateChatCap {
+            let dropped = Array(deduped.prefix(deduped.count - privateChatCap))
+            for msg in dropped {
+                messageRegistry.removeValue(forKey: msg.id)
             }
+            deduped = Array(deduped.suffix(privateChatCap))
         }
 
         privateChats[peerID] = deduped
@@ -240,10 +256,90 @@ final class PrivateChatManager: ObservableObject {
         // Send read receipts for unread messages that haven't been sent yet
         if let messages = privateChats[peerID] {
             for message in messages {
+                recordMessageID(message.id, message: message)
                 if message.senderPeerID == peerID && !message.isRelay && !sentReadReceipts.contains(message.id) {
                     sendReadReceipt(for: message)
                 }
             }
+        }
+    }
+
+    // MARK: - Deduplication
+
+    /// Check if message is duplicate.
+    /// - Parameter messageID: The message identifier to check.
+    /// - Returns: `true` if the message was already seen, `false` otherwise.
+    func isDuplicate(_ messageID: String) -> Bool {
+        return seenMessageIDs.contains(messageID)
+    }
+
+    /// Record a message in the global registry and seen set.
+    /// - Parameters:
+    ///   - messageID: The message identifier to record.
+    ///   - message: Optional message instance for O(1) status updates.
+    func recordMessageID(_ messageID: String, message: BitchatMessage? = nil) {
+        seenMessageIDs.insert(messageID)
+        if let message = message {
+            messageRegistry[messageID] = message
+        }
+
+        // Bounding the registry and seen set to prevent memory leaks
+        // seenMessageIDs is kept larger to prevent duplicate notifications for older messages
+        if messageRegistry.count > 5000 {
+            let keysToRemove = Array(messageRegistry.keys.prefix(1000))
+            for key in keysToRemove {
+                messageRegistry.removeValue(forKey: key)
+            }
+        }
+
+        if seenMessageIDs.count > 10000 {
+            let idsToRemove = Array(seenMessageIDs.prefix(2000))
+            for id in idsToRemove {
+                seenMessageIDs.remove(id)
+            }
+        }
+    }
+
+    /// Retrieve a message instance by its ID.
+    /// - Parameter messageID: The message identifier.
+    /// - Returns: The message instance if found in the registry.
+    func message(withID messageID: String) -> BitchatMessage? {
+        return messageRegistry[messageID]
+    }
+
+    /// Remove a specific message ID from the registry and seen set.
+    /// - Parameter messageID: The message identifier to remove.
+    func removeMessageID(_ messageID: String) {
+        seenMessageIDs.remove(messageID)
+        messageRegistry.removeValue(forKey: messageID)
+    }
+
+    /// Clear all seen message IDs and the registry.
+    func clearAllMessageIDs() {
+        seenMessageIDs.removeAll()
+        messageRegistry.removeAll()
+    }
+
+    // MARK: - Persistence
+
+    /// Persists seen message IDs to disk.
+    /// Should be called during app backgrounding or termination to avoid excessive IO.
+    func saveState() {
+        // Limit the number of IDs persisted to prevent performance degradation with UserDefaults
+        let limit = 5000
+        let idsToPersist = seenMessageIDs.count > limit
+            ? Array(seenMessageIDs.prefix(limit))
+            : Array(seenMessageIDs)
+
+        if let data = try? JSONEncoder().encode(idsToPersist) {
+            UserDefaults.standard.set(data, forKey: "bitchat.seenMessageIDs")
+        }
+    }
+
+    private func loadSeenMessageIDs() {
+        if let data = UserDefaults.standard.data(forKey: "bitchat.seenMessageIDs"),
+           let ids = try? JSONDecoder().decode([String].self, from: data) {
+            seenMessageIDs = Set(ids)
         }
     }
     
