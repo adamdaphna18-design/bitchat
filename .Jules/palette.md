@@ -1,0 +1,4 @@
+
+## 2024-05-18 - Dynamic Content Requires Dynamic Accessibility Labels
+**Learning:** In SwiftUI, when a button's content changes dynamically based on state (like a Play/Pause button toggling its icon using `playback.isPlaying`), its `.accessibilityLabel` must also use the same conditional logic to provide an accurate description for VoiceOver users. Also, custom complex visual elements like `WaveformView` drawn with a `Canvas` require `.accessibilityElement(children: .ignore)` combined with a dynamic `.accessibilityValue` to group the visualization into a single readable element.
+**Action:** Always check interactive elements (especially icon-only ones) for dynamic states. Apply conditional strings for `.accessibilityLabel` to match visual state changes. For custom drawn visualizations, build a unified accessibility element grouping using `.ignore` and describe the current state via `.accessibilityValue`.
