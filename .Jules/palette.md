@@ -1,0 +1,3 @@
+## $(date +%Y-%m-%d) - VoiceOver Readouts for Complex Drawing Views
+**Learning:** When using purely visual, custom drawing components in SwiftUI (like `Canvas` or `Path` based Waveforms), VoiceOver cannot interpret the visual data automatically, resulting in an unresponsive or silent accessibility element.
+**Action:** Use `.accessibilityElement(children: .ignore)` to collapse the complex child geometry elements, and then supply explicit `.accessibilityLabel` and dynamic `.accessibilityValue` modifiers to the container to provide a clean, unified readout of the component's state (e.g., playback progress percentage). Never apply this to containers that house interactive controls.

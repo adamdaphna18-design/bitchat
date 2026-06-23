@@ -63,5 +63,8 @@ struct WaveformView: View {
             }
         }
         .frame(height: 48)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Voice note waveform", comment: "Accessibility label for voice note waveform"))
+        .accessibilityValue(String(localized: "\(Int(clampedPlayback * 100)) percent played", comment: "Accessibility value for playback progress"))
     }
 }
