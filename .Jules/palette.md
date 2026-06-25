@@ -1,0 +1,3 @@
+## 2024-06-25 - VoiceNoteView and BlockRevealImageView lack accessibility labels
+**Learning:** Found icon-only buttons (`play.fill`/`pause.fill`, `xmark`) without `.accessibilityLabel` in media views. These controls are critical for interacting with or cancelling media uploads. Not having accessibility labels means VoiceOver users won't know what these buttons do.
+**Action:** When acting as the Palette persona, ensure all icon-only buttons (especially custom media controls like play/pause and cancel) explicitly include `.accessibilityLabel` modifiers to maintain proper VoiceOver and accessibility support.
