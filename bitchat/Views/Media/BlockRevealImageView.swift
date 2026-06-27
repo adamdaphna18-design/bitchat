@@ -50,6 +50,11 @@ struct BlockRevealImageView: View {
                 Image(platformImage: image)
                     .resizable()
                     .aspectRatio(aspectRatio, contentMode: .fit)
+                    .accessibilityLabel(
+                        isBlurred
+                        ? String(localized: "Blurred Image", comment: "Blurred image")
+                        : String(localized: "Image", comment: "Image")
+                    )
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -95,6 +100,7 @@ struct BlockRevealImageView: View {
                         .padding(8)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Cancel", comment: "Cancel image sending"))
             }
         }
         .onAppear {
