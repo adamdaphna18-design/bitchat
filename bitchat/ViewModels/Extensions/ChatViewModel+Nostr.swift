@@ -193,7 +193,7 @@ extension ChatViewModel {
         case .mesh:
             refreshVisibleMessages(from: .mesh)
             // Debug: log if any empty messages are present
-            let emptyMesh = messages.filter { $0.content.trimmed.isEmpty }.count
+            let emptyMesh = messages.reduce(0) { $0 + ($1.content.trimmed.isEmpty ? 1 : 0) }
             if emptyMesh > 0 {
                 SecureLogger.debug("RenderGuard: mesh timeline contains \(emptyMesh) empty messages", category: .session)
             }
