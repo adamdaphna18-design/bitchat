@@ -1,0 +1,3 @@
+## 2026-04-14 - VoiceOver Labels for Media Controls
+**Learning:** In bitchat's custom media views (like `VoiceNoteView` and `BlockRevealImageView`), icon-only buttons become completely opaque to VoiceOver without explicit accessibility labels. Furthermore, when creating localized string labels for these dynamic buttons, we should use direct string values (e.g., `String(localized: "Cancel")`) rather than complex key paths so that VoiceOver has a meaningful fallback.
+**Action:** Always verify that interactive custom UI elements, especially icon-only `Button` components in `Media` views, include an appropriate `.accessibilityLabel` modifier wrapped in `String(localized: ..., comment: ...)`.
