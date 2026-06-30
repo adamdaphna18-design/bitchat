@@ -1,0 +1,3 @@
+## 2024-05-18 - Missing Accessibility Labels in Custom Media Controls
+**Learning:** Custom interactive media views (like WaveformView, VoiceNoteView, and BlockRevealImageView) in bitchat often use icon-only buttons for actions like play/pause and cancel. Without explicit `.accessibilityLabel` modifiers, these buttons become opaque to screen readers like VoiceOver, degrading the accessibility of the media experience.
+**Action:** When creating or modifying SwiftUI views containing icon-only buttons, specifically custom media controls, always apply the `.accessibilityLabel` modifier with localized string descriptions (`String(localized: comment:)`) to ensure proper VoiceOver support and an inclusive user experience.
