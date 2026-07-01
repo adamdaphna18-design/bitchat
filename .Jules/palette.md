@@ -1,0 +1,3 @@
+## 2024-07-01 - Add Accessibility Labels to Dynamic and Icon-Only Buttons in Custom Media Views
+**Learning:** In custom media controls (like play/pause and cancel buttons), VoiceOver users cannot discern the button's action if it relies purely on icons. For buttons that change state dynamically (e.g., play vs. pause), the `.accessibilityLabel` must conditionally output the correct state so VoiceOver matches the visual state.
+**Action:** Always attach explicitly localized `.accessibilityLabel` modifiers to icon-only buttons. For buttons with dynamic state visually represented by an icon, conditionally change the `.accessibilityLabel` using `String(localized: ..., comment: ...)` so screen readers always announce the accurate state.

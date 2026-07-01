@@ -94,6 +94,7 @@ struct BlockRevealImageView: View {
                         .foregroundColor(.white)
                         .padding(8)
                 }
+                .accessibilityLabel(String(localized: "Cancel", comment: "Cancel image sending"))
                 .buttonStyle(.plain)
             }
         }
