@@ -1,0 +1,3 @@
+## 2026-03-30 - Accessibility Labels for Custom Media Views
+**Learning:** In bitchat, custom interactive media views (like VoiceNoteView and BlockRevealImageView) rely on custom SwiftUI compositions. VoiceOver cannot interpret these automatically, requiring explicit `.accessibilityLabel` modifiers on their internal generic views (e.g. icon-only play/pause and cancel buttons) to prevent them from becoming opaque to screen readers.
+**Action:** Always add explicit, conditionally dynamic accessibility labels using `String(localized: ..., comment: ...)` for icon-only buttons in custom media components.
