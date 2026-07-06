@@ -88,6 +88,7 @@ struct BlockRevealImageView: View {
             if let onCancel = onCancel, isSending {
                 Button(action: onCancel) {
                     Image(systemName: "xmark")
+                        .accessibilityLabel(String(localized: "Cancel sending", comment: "Accessibility label for cancel sending button"))
                         .font(.bitchatSystem(size: 12, weight: .bold))
                         .padding(8)
                         .background(Circle().fill(Color.black.opacity(0.7)))
