@@ -302,8 +302,8 @@ final class MessageFormattingEngine {
         let hasMentions = content.contains("@")
         let hasHashtags = content.contains("#")
         let hasURLs = content.contains("://") || content.contains("www.") || content.contains("http")
-        let hasLightning = content.lowercased().contains("ln") || content.lowercased().contains("lightning:")
-        let hasCashu = content.lowercased().contains("cashu")
+        let hasLightning = content.range(of: "ln", options: .caseInsensitive) != nil || content.range(of: "lightning:", options: .caseInsensitive) != nil // ⚡ Bolt: Avoid lowercased() string allocation
+        let hasCashu = content.range(of: "cashu", options: .caseInsensitive) != nil // ⚡ Bolt: Avoid lowercased() string allocation
 
         // Collect matches
         let mentionMatches = hasMentions ? Patterns.mention.matches(in: content, options: [], range: fullRange) : []
