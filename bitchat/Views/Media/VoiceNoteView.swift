@@ -44,6 +44,7 @@ struct VoiceNoteView: View {
         HStack(spacing: 12) {
             Button(action: playback.togglePlayback) {
                 Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
+                    .accessibilityLabel(playback.isPlaying ? String(localized: "Pause voice note", comment: "Accessibility label for pause button") : String(localized: "Play voice note", comment: "Accessibility label for play button"))
                     .foregroundColor(.white)
                     .frame(width: 36, height: 36)
                     .background(Circle().fill(Color.green))
@@ -67,6 +68,7 @@ struct VoiceNoteView: View {
             if let onCancel = onCancel, isSending {
                 Button(action: onCancel) {
                     Image(systemName: "xmark")
+                        .accessibilityLabel(String(localized: "Cancel sending", comment: "Accessibility label for cancel sending button"))
                         .font(.bitchatSystem(size: 12, weight: .bold))
                         .frame(width: 28, height: 28)
                         .background(Circle().fill(Color.red.opacity(0.9)))
