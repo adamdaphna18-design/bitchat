@@ -1,0 +1,3 @@
+## 2024-05-19 - Accessibility Labels on Dynamic Media Buttons
+**Learning:** In custom media controls (like VoiceNoteView), standard icon-only buttons (e.g. Play/Pause using `Image(systemName:)`) lack context for VoiceOver. When applying `.accessibilityLabel` to buttons whose icon toggles based on state, the label itself must be a ternary operator resolving to two distinct localized strings placed outside the ternary so Xcode's String Catalog can extract them properly.
+**Action:** Always add explicit `.accessibilityLabel` modifiers to custom icon-only media buttons. Use `String(localized: "...", comment: "...")` explicitly within ternary branches for stateful buttons.

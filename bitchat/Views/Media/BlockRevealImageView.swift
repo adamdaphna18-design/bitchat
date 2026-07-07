@@ -95,6 +95,7 @@ struct BlockRevealImageView: View {
                         .padding(8)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Cancel", comment: "Cancel image upload"))
             }
         }
         .onAppear {
