@@ -1,0 +1,3 @@
+## 2024-06-25 - Avoid intermediate arrays in Swift with .filter {}.count
+**Learning:** In Swift 5.9, chaining `.filter { ... }.count` evaluates eagerly, creating an intermediate array containing all matching elements just to count them. In high-frequency hot paths, such as BLE connection and routing loops, these intermediate array allocations cause unnecessary heap allocations and ARC (Automatic Reference Counting) overhead.
+**Action:** Use `.reduce(0) { $0 + (... ? 1 : 0) }` instead of `.filter { ... }.count` to calculate conditional counts in a single pass without allocating intermediate arrays.
