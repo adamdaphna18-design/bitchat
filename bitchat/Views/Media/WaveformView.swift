@@ -63,5 +63,20 @@ struct WaveformView: View {
             }
         }
         .frame(height: 48)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Voice note waveform", comment: "Accessibility label for voice note waveform"))
+        .accessibilityValue(String(localized: "\(Int(clampedPlayback * 100)) percent played", comment: "Accessibility value indicating voice note playback percentage"))
+        .accessibilityAdjustableAction { direction in
+            guard isInteractive, let onSeek = onSeek else { return }
+            let step = 0.1
+            switch direction {
+            case .increment:
+                onSeek(min(1.0, clampedPlayback + step))
+            case .decrement:
+                onSeek(max(0.0, clampedPlayback - step))
+            @unknown default:
+                break
+            }
+        }
     }
 }
